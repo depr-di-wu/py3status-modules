@@ -21,10 +21,20 @@ Color options:
 Requires:
     spotify: https://www.spotify.com
 
+# button numbers
+1 = left click
+2 = middle click
+3 = right click
+4 = scroll up
+5 = scroll down
+
 Example:
 
 '''
 spotify {
+    button_play_pause = 1
+    button_next = 4
+    button_previous = 5
     scroll = false
     color_high = #FF0000
     color_low = #FFFFFF
@@ -55,11 +65,27 @@ class Py3status:
     fmt = '{artist} - {song}'
     fmt_offline = 'Spotify Offline'
 
+    button_next = None
+    button_play_pause = None
+    button_previous = None
+
     def _scroll(self, t):
         if self._x <= 0:
             return t[-self._x:self._n].ljust(self._n, " ")
         else:
             return t[0:self._n - self._x].rjust(self._n, " ")
+
+    def on_click(self, event):
+        CMD = """dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify
+                 /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.{cmd}"""
+
+        button = event['button']
+        if button == self.button_play_pause:
+            self.py3.command_run(CMD.format(cmd='PlayPause'))
+        elif button == self.button_next:
+            self.py3.command_run(CMD.format(cmd='Next'))
+        elif button == self.button_previous:
+            self.py3.command_run(CMD.format(cmd='Previous'))
 
     def spotify(self):
         artist, song = _get_spotify_data()
@@ -87,9 +113,6 @@ class Py3status:
             'color': color,
             'cached_until': self.py3.time_in(0.2)
         }
-
-    def __init__(self) -> None:
-        super().__init__()
 
 
 if __name__ == "__main__":
