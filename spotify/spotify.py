@@ -44,7 +44,7 @@ spotify {
 @author di-wu
 """
 
-import dbus
+import re, dbus
 
 
 def _get_spotify_data() -> object:
@@ -93,7 +93,7 @@ class Py3status:
             full_text = self.fmt_offline
             color = self.py3.COLOR_HIGH
         else:
-            data = {'artist': artist, 'song': song}
+            data = {'artist': artist, 'song': re.sub("[\(].*?[\)]", "", song).strip()}
             full_text = self.py3.safe_format(self.fmt, data)
             color = self.py3.COLOR_LOW
 
